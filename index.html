@@ -20,34 +20,27 @@
             overflow-x: hidden;
         }
 
-        /* Animationen Definition */
+        /* Animationen */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideInUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse-gold { 
-            from { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); } 
-            to { transform: scale(1.03); box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); } 
+            from { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); } 
+            to { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 215, 0, 0.7); } 
         }
 
-        .animate-fade { animation: fadeIn 0.8s ease-out; }
-        .animate-slide { animation: slideInUp 0.5s ease-out; }
-        
-        .winner-glow { 
-            border: 2px solid #ffd700 !important;
-            animation: pulse-gold 1.5s infinite alternate !important; 
-        }
+        .animate-fade { animation: fadeIn 0.6s ease-out; }
+        .animate-slide { animation: slideInUp 0.4s ease-out; }
+        .winner-glow { border: 2px solid #ffd700 !important; animation: pulse-gold 1.5s infinite alternate !important; }
         .winner-text { color: #ffd700 !important; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
 
-        /* Layout Komponenten */
+        /* Fixierter Header (Scoreboard) */
         #sticky-header {
             position: sticky;
             top: 0;
             z-index: 100;
             background: rgba(13, 2, 33, 0.95);
             backdrop-filter: blur(10px);
-            padding: 5px 0;
+            padding: 5px 0 !important; /* Kompakt */
             border-bottom: 2px solid rgba(0, 212, 255, 0.3);
         }
 
@@ -55,7 +48,7 @@
             background: rgba(25, 25, 40, 0.8); 
             border-radius: 20px; 
             padding: 20px; 
-            margin: 15px auto; 
+            margin: 10px auto; 
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8); 
             border: 1px solid rgba(255, 255, 255, 0.1); 
             max-width: 90%; 
@@ -67,63 +60,35 @@
             background: #ff0055; 
             border: none; 
             color: white; 
-            padding: 14px 28px; 
+            padding: 12px 24px; 
             border-radius: 50px; 
             cursor: pointer; 
             font-size: 1em; 
-            margin: 8px; 
+            margin: 5px; 
             font-weight: bold; 
             transition: all 0.3s ease; 
         }
 
-        button:active { transform: scale(0.95); }
         .btn-secondary { background: #00d4ff; }
         .btn-danger { background: #cc0000; font-size: 0.8em; opacity: 0.7; }
         
         select, input { 
-            padding: 12px; border-radius: 12px; border: 1px solid #333; 
-            background: #1a1a2e; color: #00d4ff; width: 85%; margin-bottom: 15px; 
-            font-size: 1.1em;
+            padding: 10px; border-radius: 12px; border: 1px solid #333; 
+            background: #1a1a2e; color: #00d4ff; width: 80%; margin-bottom: 10px; 
         }
         
         #video-player { position: absolute; left: -9999px; width: 1px; height: 1px; }
 
-        /* Scoreboard & Timeline */
-        .scoreboard { 
-            display: flex; flex-wrap: nowrap; overflow-x: auto; 
-            justify-content: center; gap: 15px; padding: 10px;
-        }
+        /* Scoreboard Layout */
+        .scoreboard { display: flex; flex-wrap: nowrap; overflow-x: auto; justify-content: center; gap: 10px; padding: 5px; }
 
         .player-score { 
             background: rgba(20, 20, 35, 0.9); 
-            padding: 10px; border-radius: 12px; 
-            min-width: 140px; border: 1px solid #333;
+            padding: 8px !important; 
+            border-radius: 12px; 
+            min-width: 130px !important; 
+            border: 1px solid #444;
             transition: all 0.5s;
-        }
-
-        .score-val { font-size: 1.8em; display: block; margin: 2px 0; color: #bcff00; font-family: monospace; }
-        
-        .timeline { 
-            display: flex; flex-direction: column; gap: 5px; margin-top: 10px; 
-            height: 80px; overflow-y: auto; font-size: 0.7em;
-            padding-right: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;
-        }
-        
-        .timeline-card { 
-            background: #161625; padding: 6px; border-radius: 5px; 
-            border-left: 3px solid #ff0055; text-align: left;
-            animation: fadeIn 0.4s ease-in;
-        }
-
-        .song-display { color: #bcff00; font-size: 1.3em; margin-top: 10px; font-weight: bold; }
-
-        /* Scrollbar Styling */
-        .timeline::-webkit-scrollbar { width: 3px; }
-        .timeline::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
-
-        @media screen and (min-width: 900px) {
-            .scoreboard { flex-wrap: wrap; }
-            .player-score { min-width: 200px; }
         }
 
         .player-score button {
@@ -131,7 +96,25 @@
             margin: 2px !important;
             font-size: 0.7em !important;
             border-radius: 8px !important;
+            background: #444;
         }
+
+        .score-val { font-size: 1.6em !important; display: block; margin: 2px 0; color: #bcff00; font-family: monospace; }
+        
+        .timeline { 
+            display: flex; flex-direction: column; gap: 4px; margin-top: 5px; 
+            height: 75px !important; overflow-y: auto; font-size: 0.7em;
+            padding-right: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;
+        }
+        
+        .timeline-card { background: #161625; padding: 4px; border-radius: 4px; border-left: 3px solid #ff0055; text-align: left; }
+
+        .song-display { color: #bcff00; font-size: 1.2em; margin-top: 10px; font-weight: bold; }
+
+        .timeline::-webkit-scrollbar { width: 3px; }
+        .timeline::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
+
+        @media screen and (min-width: 900px) { .scoreboard { flex-wrap: wrap; } }
     </style>
 </head>
 <body>
@@ -139,22 +122,18 @@
     <div id="setup-area" class="card animate-fade">
         <h2>🎮 Quiz-Setup 🎮</h2>
         <button onclick="toggleFullscreen()" id="fs-btn" class="btn-secondary">📺 Vollbild aktivieren</button>
-        <hr style="opacity: 0.1; margin: 20px 0;">
-
-        <p>1. Musik-Kategorie wählen:</p>
+        <hr style="opacity: 0.1; margin: 15px 0;">
+        <p>1. Musik-Kategorie:</p>
         <select id="category-dropdown" onchange="updateBoxDropdown()"></select>
-
-        <p>2. Song-Paket wählen:</p>
+        <p>2. Paket:</p>
         <select id="box-dropdown"></select>
-
-        <hr style="opacity: 0.1; margin: 20px 0;">
-        <p>3. Spieleranzahl:</p>
-        <button onclick="createPlayerInputs(2)">2 Spieler</button>
-        <button onclick="createPlayerInputs(3)">3 Spieler</button>
-        <button onclick="createPlayerInputs(4)">4 Spieler</button>
-        <button onclick="createPlayerInputs(5)">5 Spieler</button>
-        
-        <div id="name-inputs" class="animate-slide"></div>
+        <hr style="opacity: 0.1; margin: 15px 0;">
+        <p>3. Spieler:</p>
+        <button onclick="createPlayerInputs(2)">2</button>
+        <button onclick="createPlayerInputs(3)">3</button>
+        <button onclick="createPlayerInputs(4)">4</button>
+        <button onclick="createPlayerInputs(5)">5</button>
+        <div id="name-inputs"></div>
         <button id="start-game-btn" class="hidden" onclick="startGame()" style="background: white; color: black;">Spiel starten 🚀</button>
     </div>
 
@@ -165,13 +144,12 @@
 
         <div class="card animate-slide">
             <h2 id="status">Bereit?</h2>
-            <button id="random-btn" onclick="pickRandomSong()" style="font-size: 1.2em; background: #1DB954;">🎲 Nächster Song</button>
-            
+            <button id="random-btn" onclick="pickRandomSong()" style="font-size: 1.1em; background: #1DB954;">🎲 Nächster Song</button>
             <iframe id="video-player" src="" frameborder="0" allow="autoplay"></iframe>
             
-            <div id="controls" class="hidden animate-fade" style="margin-top: 15px;">
-                <button onclick="startVideo()" style="background: #ffffff; color: black;">▶️ Abspielen</button>
-                <button onclick="stopVideo()" style="background: #cc0000; color: white;">⏹️ Stopp</button>
+            <div id="controls" class="hidden animate-fade">
+                <button onclick="startVideo()" style="background: white; color: black;">▶️ Play</button>
+                <button onclick="stopVideo()" style="background: #cc0000;">⏹️ Stopp</button>
                 <br>
                 <button onclick="revealInfo()" class="btn-secondary" style="margin-top: 10px;">👁️ Lösung zeigen</button>
             </div>
@@ -184,10 +162,10 @@
             </div>
         </div>
 
-        <div style="margin-top: 20px; padding-bottom: 40px;">
-            <p id="db-count" style="font-size: 0.8em; color: #888;">Lieder im Pool: 0</p>
-            <button onclick="resetScores()" style="background: #ffa500; color: black; font-size: 0.8em;">🔄 Runde zurücksetzen</button>
-            <button onclick="resetGame()" class="btn-danger">Anderes Spiel wählen</button>
+        <div style="margin-top: 15px;">
+            <p id="db-count" style="font-size: 0.75em; color: #888;">Lieder im Pool: 0</p>
+            <button onclick="resetScores()" style="background: #ffa500; color: black; font-size: 0.7em;">🔄 Punkte Reset</button>
+            <button onclick="resetGame()" class="btn-danger">❌ Alles löschen & Menü</button>
         </div>
     </div>
 
@@ -203,8 +181,8 @@
             "Box 7": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFJKjMwCXk5U6ifDInvMYAvIAwY1zkgyLcGi32iwwokaaRGj1VbfV5olGsIT4_8x8Nw0NTt-eiJ4FB/pub?output=csv",
             "Box 8": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSL_cHFCBj95FNpJsyoX_MPDy8VxIJzsw2jFvex4NqG73TmmZV5GspYUma1W9aowmnvCcGBJRRRYVCL/pub?output=csv"
         },
-        "80er - 90er Fabi": { "Best of 80s": "DEIN_LINK_HIER" },
-        "Meine Mixe": { "Party Mix 1": "DEIN_LINK_HIER" }
+        "80er Spezial": { "Best of 80s": "DEIN_LINK_HIER" },
+        "Mixe": { "Party 1": "DEIN_LINK_HIER" }
     };
 
     let songDatenbank = [];
@@ -227,16 +205,6 @@
             if(lastUrl) loadSongsFromUrl(lastUrl).then(() => showGame());
         }
     };
-
-    function toggleFullscreen() {
-        let elem = document.documentElement;
-        let btn = document.getElementById('fs-btn');
-        if (!document.fullscreenElement) {
-            elem.requestFullscreen().then(() => { btn.innerText = "📺 Vollbild beenden"; }).catch(e => console.log(e));
-        } else {
-            document.exitFullscreen(); btn.innerText = "📺 Vollbild aktivieren";
-        }
-    }
 
     function updateBoxDropdown() {
         const kat = document.getElementById('category-dropdown').value;
@@ -268,10 +236,8 @@
 
     function createPlayerInputs(num) {
         const container = document.getElementById('name-inputs');
-        container.innerHTML = "<h3>Namen eingeben:</h3>";
-        for(let i=1; i<=num; i++) {
-            container.innerHTML += `<input type="text" id="name-${i}" placeholder="Spieler ${i}" class="animate-fade">`;
-        }
+        container.innerHTML = "<h3>Namen:</h3>";
+        for(let i=1; i<=num; i++) { container.innerHTML += `<input type="text" id="name-${i}" placeholder="Spieler ${i}">`; }
         document.getElementById('start-game-btn').classList.remove('hidden');
     }
 
@@ -292,8 +258,14 @@
     }
 
     function pickRandomSong() {
+        playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
         const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
-        if (pool.length === 0) return alert("Paket leer!");
+        
+        if (pool.length === 0) {
+            alert("Paket leer! Bitte Spiel resetten oder neues Paket wählen.");
+            return;
+        }
+
         currentSong = pool[Math.floor(Math.random() * pool.length)];
         document.getElementById('status').innerText = "Song geladen!";
         document.getElementById('display-title').innerText = currentSong.titel + " - " + currentSong.interpret;
@@ -328,8 +300,8 @@
                     <small>🏆 ${p.wins || 0}</small><br>
                     <strong class="${isWinner ? 'winner-text' : ''}">${p.name}</strong>
                     <span class="score-val ${isWinner ? 'winner-text' : ''}">${p.score}</span>
-                    <button onclick="addPoint(${i})" style="padding: 5px 10px;">+1</button>
-                    <button onclick="updateScore(${i}, -1)" style="background:#555; padding: 5px 10px;">-1</button>
+                    <button onclick="addPoint(${i})">+1</button>
+                    <button onclick="updateScore(${i}, -1)">-1</button>
                     <div class="timeline">${timelineHTML}</div>
                 </div>`;
         });
@@ -339,13 +311,23 @@
         if (!currentSong) return;
         players[idx].timeline.push({ titel: currentSong.titel, jahr: currentSong.jahr });
         players[idx].score = players[idx].timeline.length;
+        renderScoreboard();
+
         if (players[idx].score >= 10) {
             players[idx].wins = (players[idx].wins || 0) + 1;
             confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
-            setTimeout(() => { alert("🥇 " + players[idx].name + " hat die Runde gewonnen!"); }, 500);
+            localStorage.setItem('hitster_db_players', JSON.stringify(players));
+            
+            setTimeout(() => { 
+                if(confirm("🏆 " + players[idx].name + " GEWINNT!\n\nNeue Runde mit diesen Spielern starten? (Gespielte Lieder bleiben gesperrt)")) {
+                    players.forEach(p => { p.score = 0; p.timeline = []; });
+                    localStorage.setItem('hitster_db_players', JSON.stringify(players));
+                    renderScoreboard();
+                }
+            }, 600);
+        } else {
+            localStorage.setItem('hitster_db_players', JSON.stringify(players));
         }
-        localStorage.setItem('hitster_db_players', JSON.stringify(players));
-        renderScoreboard();
     }
 
     function updateScore(i, v) {
@@ -360,8 +342,17 @@
         document.getElementById('db-count').innerText = `Pool: ${pool.length}`;
     }
 
-    function resetScores() { if(confirm("Runde zurücksetzen?")) { players.forEach(p => {p.score=0; p.timeline=[];}); renderScoreboard(); } }
-    function resetGame() { if(confirm("Zurück zum Menü?")) { localStorage.clear(); location.reload(); } }
+    function toggleFullscreen() {
+        let elem = document.documentElement;
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().then(() => { document.getElementById('fs-btn').innerText = "📺 Beenden"; }).catch(e => console.log(e));
+        } else {
+            document.exitFullscreen(); document.getElementById('fs-btn').innerText = "📺 Vollbild";
+        }
+    }
+
+    function resetScores() { if(confirm("Punkte dieser Runde löschen?")) { players.forEach(p => {p.score=0; p.timeline=[];}); renderScoreboard(); } }
+    function resetGame() { if(confirm("ALLES LÖSCHEN? (Namen, Siege und Sperrliste der Songs)")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>

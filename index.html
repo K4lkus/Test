@@ -166,6 +166,7 @@
             <p id="db-count" style="font-size: 0.75em; color: #888;">Lieder im Pool: 0</p>
             <button onclick="resetScores()" style="background: #ffa500; color: black; font-size: 0.7em;">🔄 Punkte Reset</button>
             <button onclick="resetGame()" class="btn-danger">❌ Alles löschen & Menü</button>
+            <button onclick="toggleFullscreen()" class="btn-secondary" style="font-size: 0.7em; padding: 5px 10px;">📺 Vollbild</button>
         </div>
     </div>
 
@@ -345,9 +346,15 @@
     function toggleFullscreen() {
         let elem = document.documentElement;
         if (!document.fullscreenElement) {
-            elem.requestFullscreen().then(() => { document.getElementById('fs-btn').innerText = "📺 Beenden"; }).catch(e => console.log(e));
+            elem.requestFullscreen().then(() => {
+                // Text auf beiden möglichen Buttons aktualisieren
+                if(document.getElementById('fs-btn')) document.getElementById('fs-btn').innerText = "📺 Beenden";
+                if(document.getElementById('fs-btn-game')) document.getElementById('fs-btn-game').innerText = "📺 Beenden";
+            }).catch(e => console.log(e));
         } else {
-            document.exitFullscreen(); document.getElementById('fs-btn').innerText = "📺 Vollbild";
+            document.exitFullscreen();
+            if(document.getElementById('fs-btn')) document.getElementById('fs-btn').innerText = "📺 Vollbild";
+            if(document.getElementById('fs-btn-game')) document.getElementById('fs-btn-game').innerText = "📺 Vollbild";
         }
     }
 

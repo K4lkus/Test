@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title> 🎵 Hit-Quiz TV 🎵 </title>
+    <title> 🎵 Multi-Hit-Quiz TV 🎵 </title>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
@@ -19,12 +19,12 @@
             min-height: 100vh;
         }
 
-        /* Fixiert das Scoreboard oben */
+        /* Fixiert das Scoreboard oben am TV */
         #sticky-header {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(13, 2, 33, 0.9);
+            background: rgba(13, 2, 33, 0.95);
             backdrop-filter: blur(10px);
             padding: 10px 0;
             border-bottom: 2px solid rgba(0, 212, 255, 0.3);
@@ -58,18 +58,17 @@
         }
 
         button:active { transform: scale(0.95); }
-        
         .btn-secondary { background: #00d4ff; }
         .btn-danger { background: #cc0000; font-size: 0.8em; opacity: 0.7; }
         
         select, input { 
             padding: 12px; border-radius: 12px; border: 1px solid #333; 
             background: #1a1a2e; color: #00d4ff; width: 85%; margin-bottom: 15px; 
+            font-size: 1.1em; outline: none;
         }
         
         #video-player { position: absolute; left: -9999px; width: 1px; height: 1px; }
 
-        /* Scoreboard Layout: Nebeneinander */
         .scoreboard { 
             display: flex; 
             flex-wrap: nowrap; 
@@ -92,13 +91,30 @@
             display: block; 
             margin: 5px 0; 
             color: #bcff00; 
-            text-shadow: 0 0 10px rgba(188, 255, 0, 0.4); 
             font-family: monospace; 
         }
         
         .timeline { 
-            display: flex; flex-direction: column; gap: 5px; margin-top: 10px; 
-            max-height: 100px; overflow-y: auto; font-size: 0.75em;
+            display: flex; 
+             flex-direction: column; 
+            gap: 5px; 
+            margin-top: 10px; 
+    
+            /* FIXIERTE GRÖSSE */
+            height: 120px;       /* Feste Höhe für alle Spieler-Karten */
+            overflow-y: auto;    /* Erlaubt Scrollen innerhalb der Karte */
+    
+            font-size: 0.75em;
+            padding-right: 5px;  /* Platz für den Scrollbalken */
+        }
+
+        /* Optional: Den Scrollbalken etwas schöner machen */
+        .timeline::-webkit-scrollbar {
+            width: 4px;
+        }
+        .timeline::-webkit-scrollbar-thumb {
+            background: #ff0055;
+            border-radius: 10px;
         }
         
         .timeline-card { 
@@ -106,12 +122,8 @@
             border-left: 3px solid #ff0055; text-align: left; 
         }
 
-        .winner-glow { color: #ffd700 !important; animation: pulse-gold 1.5s infinite alternate; }
-        @keyframes pulse-gold { from { transform: scale(1); } to { transform: scale(1.05); } }
+        .song-display { color: #bcff00; font-size: 1.3em; margin-top: 10px; font-weight: bold; }
 
-        .song-display { color: #bcff00; font-size: 1.2em; margin-top: 10px; }
-
-        /* Anpassung für Querformat/TV */
         @media screen and (min-width: 900px) {
             .scoreboard { flex-wrap: wrap; }
             .player-score { min-width: 200px; }
@@ -121,22 +133,21 @@
 <body>
 
     <div id="setup-area" class="card">
-        <h2>👥 Hit-Quiz Setup 👥</h2>
+        <h2>🎮 Quiz-Setup 🎮</h2>
+        
         <button onclick="toggleFullscreen()" id="fs-btn" class="btn-secondary">📺 Vollbild aktivieren</button>
         <hr style="opacity: 0.1; margin: 20px 0;">
-        <p>1. Wähle ein Song-Paket:</p>
-        <select id="playlist-dropdown">
-            <option value="set1">Box 1</option>
-            <option value="set2">Box 2</option>
-            <option value="set3">Box 3</option>
-            <option value="set4">Box 4</option>
-            <option value="set5">Box 5</option>
-            <option value="set6">Box 6</option>
-            <option value="set7">Box 7</option>
-            <option value="set8">Box 8</option>
-        </select>
 
-        <p>2. Wie viele Personen spielen?</p>
+        <p>1. Musik-Kategorie wählen:</p>
+        <select id="category-dropdown" onchange="updateBoxDropdown()">
+            </select>
+
+        <p>2. Song-Paket wählen:</p>
+        <select id="box-dropdown">
+            </select>
+
+        <hr style="opacity: 0.1; margin: 20px 0;">
+        <p>3. Wie viele Personen spielen?</p>
         <button onclick="createPlayerInputs(2)">2 Spieler</button>
         <button onclick="createPlayerInputs(3)">3 Spieler</button>
         <button onclick="createPlayerInputs(4)">4 Spieler</button>
@@ -147,7 +158,6 @@
     </div>
 
     <div id="game-area" class="hidden">
-        
         <div id="sticky-header">
             <div id="scoreboard" class="scoreboard"></div>
         </div>
@@ -167,49 +177,41 @@
 
             <div id="song-info" class="hidden">
                 <div class="song-display">
-                    <strong id="display-title"></strong><br>
-                    <span id="display-year"></span>
+                    <span id="display-title"></span><br>
+                    <span id="display-year" style="font-size: 0.8em; opacity: 0.8;"></span>
                 </div>
             </div>
         </div>
 
         <div style="margin-top: 20px; padding-bottom: 40px;">
-            <p id="db-count" style="font-size: 0.8em; color: #888;">Songs geladen: 0</p>
+            <p id="db-count" style="font-size: 0.8em; color: #888;">Lieder im Pool: 0</p>
             <button onclick="resetScores()" style="background: #ffa500; color: black; font-size: 0.8em;">🔄 Runde zurücksetzen</button>
-            <button onclick="resetGame()" class="btn-danger">Kompletter Reset</button>
+            <button onclick="resetGame()" class="btn-danger">Anderes Spiel wählen</button>
         </div>
     </div>
 
 <script>
     // ==========================================
-    // 1. SPIEL-DATEN & INITIALISIERUNG
+    // DATENSTRUKTUR FÜR MEHRERE SPIELE
     // ==========================================
-
-    function toggleFullscreen() {
-        let elem = document.documentElement;
-        let btn = document.getElementById('fs-btn');
-    
-        if (!document.fullscreenElement) {
-            elem.requestFullscreen().then(() => {
-                btn.innerText = "📺 Vollbild beenden";
-            }).catch(err => {
-                console.log("Vollbild Fehler: " + err.message);
-            });
-        } else {
-            document.exitFullscreen();
-            btn.innerText = "📺 Vollbild aktivieren";
+    const quizDaten = {
+        "Vinyl-Singles": {
+            "Box 1": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJkS7ZgyqTEyjfOdiQ0wFlhllm_ZeQHQo9S5z597Jq7ejqKjVjZRTIg9FHoaEx-rGGhsOCAEg5PL1G/pub?output=csv",
+            "Box 2": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzYclEUZUBUMy_NurHcMxlTxKKrmAXrJvSgjXuWw8K-IJIvKujFNNhWLTOXgPCUGCZQshmA-7m1bf1/pub?output=csv",
+            "Box 3": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0gsqAIvj8J9NuQXKPmcwhRa4sNz-i-Uts1e-aGa8nS_eKWOAyrBFrgp68KHuc1pCl2j5LPBTNQFg7/pub?output=csv",
+            "Box 4": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwwFxrPET10PDMDMNSDGxzb1AnrYCJl51OFpZPn9nM8S8z2Vxv10XTYLd5m4Yno_8ahRBNTLK2Z5Ga/pub?output=csv",
+            "Box 5": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9cOQXUt5d9uTPija5-R66ZO342W8DlXXLdGKYvlZni4ROoYF2WRlTUECeeO0NdTOAgH1yCryyA1TI/pub?output=csv",
+            "Box 6": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO4s3amgq4KaLoVNjVdNhG4A8mUZG4wL3X_3QOAvVZyCVANVG4xazxGbHSEa7bUaRONcqQ97fXr32V/pub?output=csv",
+            "Box 7": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFJKjMwCXk5U6ifDInvMYAvIAwY1zkgyLcGi32iwwokaaRGj1VbfV5olGsIT4_8x8Nw0NTt-eiJ4FB/pub?output=csv",
+            "Box 8": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSL_cHFCBj95FNpJsyoX_MPDy8VxIJzsw2jFvex4NqG73TmmZV5GspYUma1W9aowmnvCcGBJRRRYVCL/pub?output=csv"
+        },
+        "80er Spezial": {
+            "Best of 80s": "DEIN_LINK_HIER",
+            "NDW & Disco": "DEIN_LINK_HIER"
+        },
+        "Meine Mixe": {
+            "Party Mix 1": "DEIN_LINK_HIER"
         }
-    }
-
-    const playlists = {
-        set1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJkS7ZgyqTEyjfOdiQ0wFlhllm_ZeQHQo9S5z597Jq7ejqKjVjZRTIg9FHoaEx-rGGhsOCAEg5PL1G/pub?output=csv",
-        set2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzYclEUZUBUMy_NurHcMxlTxKKrmAXrJvSgjXuWw8K-IJIvKujFNNhWLTOXgPCUGCZQshmA-7m1bf1/pub?output=csv",
-        set3: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0gsqAIvj8J9NuQXKPmcwhRa4sNz-i-Uts1e-aGa8nS_eKWOAyrBFrgp68KHuc1pCl2j5LPBTNQFg7/pub?output=csv",
-        set4: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRwwFxrPET10PDMDMNSDGxzb1AnrYCJl51OFpZPn9nM8S8z2Vxv10XTYLd5m4Yno_8ahRBNTLK2Z5Ga/pub?output=csv",
-        set5: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9cOQXUt5d9uTPija5-R66ZO342W8DlXXLdGKYvlZni4ROoYF2WRlTUECeeO0NdTOAgH1yCryyA1TI/pub?output=csv",
-        set6: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO4s3amgq4KaLoVNjVdNhG4A8mUZG4wL3X_3QOAvVZyCVANVG4xazxGbHSEa7bUaRONcqQ97fXr32V/pub?output=csv",
-        set7: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFJKjMwCXk5U6ifDInvMYAvIAwY1zkgyLcGi32iwwokaaRGj1VbfV5olGsIT4_8x8Nw0NTt-eiJ4FB/pub?output=csv",    
-        set8: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSL_cHFCBj95FNpJsyoX_MPDy8VxIJzsw2jFvex4NqG73TmmZV5GspYUma1W9aowmnvCcGBJRRRYVCL/pub?output=csv"
     };
 
     let songDatenbank = [];
@@ -218,16 +220,49 @@
     let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
 
     window.onload = function() {
+        const catDropdown = document.getElementById('category-dropdown');
+        for (let kat in quizDaten) {
+            let opt = document.createElement('option');
+            opt.value = kat;
+            opt.innerHTML = kat;
+            catDropdown.appendChild(opt);
+        }
+        updateBoxDropdown();
+
         const saved = localStorage.getItem('hitster_db_players');
         if (saved) {
             players = JSON.parse(saved);
-            const lastSet = localStorage.getItem('hitster_last_set') || 'set1';
-            loadSongsFromSheet(lastSet).then(() => showGame());
+            const lastUrl = localStorage.getItem('hitster_last_url');
+            if(lastUrl) loadSongsFromUrl(lastUrl).then(() => showGame());
         }
     };
 
-    async function loadSongsFromSheet(selectedKey) {
-        const url = playlists[selectedKey];
+    function toggleFullscreen() {
+        let elem = document.documentElement;
+        let btn = document.getElementById('fs-btn');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().then(() => {
+                btn.innerText = "📺 Vollbild beenden";
+            }).catch(err => console.log(err));
+        } else {
+            document.exitFullscreen();
+            btn.innerText = "📺 Vollbild aktivieren";
+        }
+    }
+
+    function updateBoxDropdown() {
+        const kat = document.getElementById('category-dropdown').value;
+        const boxDropdown = document.getElementById('box-dropdown');
+        boxDropdown.innerHTML = "";
+        for (let box in quizDaten[kat]) {
+            let opt = document.createElement('option');
+            opt.value = quizDaten[kat][box];
+            opt.innerHTML = box;
+            boxDropdown.appendChild(opt);
+        }
+    }
+
+    async function loadSongsFromUrl(url) {
         try {
             const response = await fetch(url);
             const data = await response.text();
@@ -246,18 +281,12 @@
             }
             songDatenbank = geladeneSongs;
             updateDbCounter();
-            localStorage.setItem('hitster_last_set', selectedKey);
+            localStorage.setItem('hitster_last_url', url);
             return true;
         } catch (e) {
             alert("Fehler beim Laden!");
             return false;
         }
-    }
-
-    function updateDbCounter() {
-        const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
-        const dbCountElem = document.getElementById('db-count');
-        if(dbCountElem) dbCountElem.innerText = `Noch verfügbar: ${pool.length} (Gespielt: ${playedSongIds.length})`;
     }
 
     function createPlayerInputs(num) {
@@ -270,8 +299,8 @@
     }
 
     async function startGame() {
-        const set = document.getElementById('playlist-dropdown').value;
-        const ok = await loadSongsFromSheet(set);
+        const url = document.getElementById('box-dropdown').value;
+        const ok = await loadSongsFromUrl(url);
         if(!ok) return;
         const inputs = document.querySelectorAll('#name-inputs input');
         players = Array.from(inputs).map(inp => ({
@@ -290,13 +319,9 @@
         renderScoreboard();
     }
 
-    // ==========================================
-    // 2. SPIEL-STEUERUNG
-    // ==========================================
-
     function pickRandomSong() {
         const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
-        if (pool.length === 0) return alert("Paket leer!");
+        if (pool.length === 0) return alert("Dieses Paket ist leer!");
         currentSong = pool[Math.floor(Math.random() * pool.length)];
         document.getElementById('status').innerText = "Song bereit!";
         document.getElementById('display-title').innerText = currentSong.titel + " - " + currentSong.interpret;
@@ -346,14 +371,11 @@
         if (!currentSong) return;
         players[idx].timeline.push({ titel: currentSong.titel, jahr: currentSong.jahr });
         players[idx].score = players[idx].timeline.length;
-        
         if (players[idx].score >= 10) {
             players[idx].wins = (players[idx].wins || 0) + 1;
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             renderScoreboard();
-            setTimeout(() => {
-                alert("🏆 " + players[idx].name + " hat GEWONNEN!");
-            }, 500);
+            setTimeout(() => { alert("🏆 " + players[idx].name + " hat GEWONNEN!"); }, 500);
         }
         localStorage.setItem('hitster_db_players', JSON.stringify(players));
         renderScoreboard();
@@ -366,6 +388,11 @@
         renderScoreboard();
     }
 
+    function updateDbCounter() {
+        const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
+        document.getElementById('db-count').innerText = `Lieder im Pool: ${pool.length}`;
+    }
+
     function resetScores() {
         if(confirm("Punkte dieser Runde löschen?")) {
             players.forEach(p => { p.score = 0; p.timeline = []; });
@@ -375,8 +402,9 @@
     }
     
     function resetGame() {
-        if(confirm("ALLES löschen (auch Namen & gespielte Songs)?")) {
-            localStorage.clear();
+        if(confirm("Zurück zum Hauptmenü? (Namen werden gelöscht)")) {
+            localStorage.removeItem('hitster_db_players');
+            localStorage.removeItem('hitster_last_url');
             location.reload();
         }
     }

@@ -262,23 +262,34 @@
     }
 
     function pickRandomSong() {
+        // 1. Den alten Song für "Undo" merken, falls schon einer geladen war
         if (currentSong) {
-            lastSong = currentSong;
-            document.getEelementById('undo-btn').classList.remove('hidden');
+            lastSong = currentSong; 
+            const undoBtn = document.getElementById('undo-btn');
+            if (undoBtn) undoBtn.classList.remove('hidden');
         }
-        
+
+        // 2. Pool aus der Datenbank laden
         playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
         const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
-        
+    
         if (pool.length === 0) {
             alert("Paket leer! Bitte Spiel resetten oder neues Paket wählen.");
             return;
         }
 
+        // 3. Zufälligen Song auswählen
         currentSong = pool[Math.floor(Math.random() * pool.length)];
+    
+        // 4. Die Anzeige aktualisieren (Aufruf der neuen Funktion)
+        displaySong(currentSong);
+    }
+
+    // DIESE FUNKTION FEHLTE DIR:
+    function displaySong(song) {
         document.getElementById('status').innerText = "Song geladen!";
-        document.getElementById('display-title').innerText = currentSong.titel + " - " + currentSong.interpret;
-        document.getElementById('display-year').innerText = "Jahr: " + currentSong.jahr;
+        document.getElementById('display-title').innerText = song.titel + " - " + song.interpret;
+        document.getElementById('display-year').innerText = "Jahr: " + song.jahr;
         document.getElementById('controls').classList.remove('hidden');
         document.getElementById('song-info').classList.add('hidden');
         document.getElementById('video-player').src = "";

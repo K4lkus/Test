@@ -165,6 +165,7 @@
         </div>
 
         <div style="margin-top: 15px;">
+            <p id="current-box-info" style="font-size: 0.8em; color: #00d4ff; margin-bottom: 2px;">Paket: -</p>
             <p id="db-count" style="font-size: 0.75em; color: #888;">Lieder im Pool: 0</p>
             <button onclick="resetScores()" style="background: #ffa500; color: black; font-size: 0.7em;">🔄 Punkte Reset</button>
             <button onclick="resetGame()" class="btn-danger">❌ Alles löschen & Menü</button>
@@ -234,6 +235,9 @@
             songDatenbank = geladeneSongs.filter(s => s.ytId && s.ytId.length > 5);
             updateDbCounter();
             localStorage.setItem('hitster_last_url', url);
+            // Den Namen des Pakets aus dem Dropdown auslesen und anzeigen
+            const boxName = document.getElementById('box-dropdown').options[document.getElementById('box-dropdown').selectedIndex].text;
+            document.getElementById('current-box-info').innerText = "Paket: " + boxName;
             return true;
         } catch (e) { alert("Fehler beim Laden!"); return false; }
     }
@@ -313,28 +317,52 @@
         return false;
     }
 
-    // Hilfsfunktion, um Songs an die bestehende DB anzuhängen
     async function appendSongsFromUrl(url) {
         try {
             const response = await fetch(url);
+            if (!response.ok) throw new Error("Netzwerk-Fehler");
+        
             const data = await response.text();
             const rows = data.split(/\r?\n/);
         
+            // 1. Namen der neuen Box für die Anzeige finden
+            const currentKat = document.getElementById('category-dropdown').value;
+            const boxenInKat = quizDaten[currentKat];
+            const nextBoxName = Object.keys(boxenInKat).find(key => boxenInKat[key] === url);
+        
+            if (nextBoxName) {
+                document.getElementById('current-box-info').innerText = "Paket: " + nextBoxName;
+            }
+
+            // 2. Lieder parsen und zur songDatenbank HINZUFÜGEN
             for (let i = 1; i < rows.length; i++) {
                 if (!rows[i].trim()) continue;
+            
+                // Trenner finden (Semikolon oder Komma)
                 const delimiter = rows[i].includes(';') ? ';' : ',';
+                // Spalten trennen und Anführungszeichen entfernen
                 const columns = rows[i].split(delimiter).map(col => col.replace(/^"|"$/g, '').trim());
 
                 if (columns.length >= 4) {
                     songDatenbank.push({ 
-                        ytId: columns[0], titel: columns[1], interpret: columns[2], jahr: columns[3] 
+                        ytId: columns[0], 
+                        titel: columns[1], 
+                        interpret: columns[2], 
+                        jahr: columns[3] 
                     });
-                    }
-          }
-          updateDbCounter();
-          localStorage.setItem('hitster_last_url', url);
-          return true;
-       } catch (e) { return false; }
+                }
+            }
+
+            // 3. Counter und Speicher aktualisieren
+            updateDbCounter();
+            localStorage.setItem('hitster_last_url', url);
+        
+            console.log("Neues Paket erfolgreich angehängt: " + nextBoxName);
+            return true;
+        } catch (e) {
+            console.error("Fehler beim Anhängen der Box:", e);
+            return false;
+        }
     }
 
     // DIESE FUNKTION FEHLTE DIR:

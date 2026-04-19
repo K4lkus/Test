@@ -145,6 +145,8 @@
         <div class="card animate-slide">
             <h2 id="status">Bereit?</h2>
             <button id="random-btn" onclick="pickRandomSong()" style="font-size: 1.1em; background: #1DB954;">🎲 Nächster Song</button>
+            <br>
+            <button id="undo-btn" onclick="undoLastSong()" class="hidden" style="font-size: 0.8em; background: #555; margin-top: 5px;">↩️ Ups, einen Song zurück</button>
             <iframe id="video-player" src="" frameborder="0" allow="autoplay"></iframe>
             
             <div id="controls" class="hidden animate-fade">
@@ -189,6 +191,7 @@
     let songDatenbank = [];
     let players = [];
     let currentSong = null;
+    let lastSong = null;
     let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
 
     window.onload = function() {
@@ -259,6 +262,11 @@
     }
 
     function pickRandomSong() {
+        if (currentSong) {
+            lastSong = currentSong;
+            document.getEelementById('undo-btn').classList.remove('hidden');
+        }
+        
         playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
         const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
         
@@ -275,7 +283,7 @@
         document.getElementById('song-info').classList.add('hidden');
         document.getElementById('video-player').src = "";
     }
-
+        
     function startVideo() { if(currentSong) document.getElementById('video-player').src = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1`; }
     function stopVideo() { document.getElementById('video-player').src = ""; }
 
@@ -332,12 +340,24 @@
     }
 
     function updateScore(i, v) {
-        if (v < 0 && players[i].timeline.length > 0) players[i].timeline.pop();
+        if (v < 0 && players[i].timeline.length > 0) {
+            // Den letzten Song aus der Timeline des Spielers holen
+            const removedSong = players[i].timeline.pop();
+        
+            // Optional: Den Song wieder für den Pool freigeben
+            // Wenn du willst, dass der Song gelöscht bleibt, lass die nächste Zeile weg:
+            playedSongIds = playedSongIds.filter(s => s.titel !== removedSong.titel);
+        
+            localStorage.setItem('hitster_played_songs', JSON.stringify(playedSongIds));
+        }
+    
+        // Score aktualisieren
         players[i].score = players[i].timeline.length;
         localStorage.setItem('hitster_db_players', JSON.stringify(players));
         renderScoreboard();
+        updateDbCounter();
     }
-
+    
     function updateDbCounter() {
         const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
         document.getElementById('db-count').innerText = `Pool: ${pool.length}`;
@@ -355,6 +375,22 @@
             document.exitFullscreen();
             if(document.getElementById('fs-btn')) document.getElementById('fs-btn').innerText = "📺 Vollbild";
             if(document.getElementById('fs-btn-game')) document.getElementById('fs-btn-game').innerText = "📺 Vollbild";
+        }
+    }
+
+    function undoLastSong() {
+        if (lastSong) {
+            currentSong = lastSong;
+            lastSong = null; // Nur einmaliges Zurückgehen erlauben
+            displaySong(currentSong);
+            document.getElementById('undo-btn').classList.add('hidden');
+        
+            // Den Song wieder aus der Sperrliste entfernen, falls er dort schon gelandet ist
+            playedSongIds = playedSongIds.filter(id => id !== currentSong.ytId);
+            localStorage.setItem('hitster_played_songs', JSON.stringify(playedSongIds));
+            updateDbCounter();
+        
+            alert("Letzter Song wurde wiederhergestellt!");
         }
     }
 

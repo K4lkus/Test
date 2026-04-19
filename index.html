@@ -261,28 +261,80 @@
         renderScoreboard();
     }
 
-    function pickRandomSong() {
-        // 1. Den alten Song für "Undo" merken, falls schon einer geladen war
-        if (currentSong) {
-            lastSong = currentSong; 
-            const undoBtn = document.getElementById('undo-btn');
-            if (undoBtn) undoBtn.classList.remove('hidden');
-        }
+    async function pickRandomSong() {
+    // 1. Undo-Logik wie gehabt
+    if (currentSong) {
+        lastSong = currentSong; 
+        if (document.getElementById('undo-btn')) document.getElementById('undo-btn').classList.remove('hidden');
+    }
 
-        // 2. Pool aus der Datenbank laden
-        playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
-        const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
+    playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
+    let pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
     
-        if (pool.length === 0) {
-            alert("Paket leer! Bitte Spiel resetten oder neues Paket wählen.");
+    // 2. PRÜFUNG: Ist der Pool leer?
+    if (pool.length === 0) {
+        const autoNext = confirm("Diese Box ist leer! Möchtest du automatisch das nächste verfügbare Paket laden, um die Runde fortzusetzen?");
+        
+        if (autoNext) {
+            if (!await loadNextBox()) {
+                alert("Keine weiteren Pakete in dieser Kategorie gefunden.");
+                return;
+            }
+            // Pool nach dem Laden der neuen Box aktualisieren
+            pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
+        } else {
             return;
         }
+    }
 
-        // 3. Zufälligen Song auswählen
-        currentSong = pool[Math.floor(Math.random() * pool.length)];
+    // 3. Song auswählen und anzeigen
+    currentSong = pool[Math.floor(Math.random() * pool.length)];
+    displaySong(currentSong);
+}
+
+    async function loadNextBox() {
+        const currentKat = document.getElementById('category-dropdown').value;
+        const currentUrl = localStorage.getItem('hitster_last_url');
+        const boxen = Object.values(quizDaten[currentKat]);
+        const namen = Object.keys(quizDaten[currentKat]);
     
-        // 4. Die Anzeige aktualisieren (Aufruf der neuen Funktion)
-        displaySong(currentSong);
+        // Finde den Index der aktuellen Box
+        const currentIndex = boxen.indexOf(currentUrl);
+    
+        if (currentIndex !== -1 && currentIndex < boxen.length - 1) {
+            const nextUrl = boxen[currentIndex + 1];
+            const nextName = namen[currentIndex + 1];
+        
+            console.log("Lade nächste Box: " + nextName);
+        
+            // Songs der neuen Box zur bestehenden Datenbank HINZUFÜGEN (nicht ersetzen)
+            return await appendSongsFromUrl(nextUrl);
+        }
+        return false;
+    }
+
+    // Hilfsfunktion, um Songs an die bestehende DB anzuhängen
+    async function appendSongsFromUrl(url) {
+        try {
+            const response = await fetch(url);
+            const data = await response.text();
+            const rows = data.split(/\r?\n/);
+        
+            for (let i = 1; i < rows.length; i++) {
+                if (!rows[i].trim()) continue;
+                const delimiter = rows[i].includes(';') ? ';' : ',';
+                const columns = rows[i].split(delimiter).map(col => col.replace(/^"|"$/g, '').trim());
+
+                if (columns.length >= 4) {
+                    songDatenbank.push({ 
+                        ytId: columns[0], titel: columns[1], interpret: columns[2], jahr: columns[3] 
+                    });
+                    }
+          }
+          updateDbCounter();
+          localStorage.setItem('hitster_last_url', url);
+          return true;
+       } catch (e) { return false; }
     }
 
     // DIESE FUNKTION FEHLTE DIR:

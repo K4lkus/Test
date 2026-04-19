@@ -284,7 +284,13 @@
         document.getElementById('video-player').src = "";
     }
         
-    function startVideo() { if(currentSong) document.getElementById('video-player').src = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1`; }
+    function startVideo() { 
+        if(currentSong) {
+            // Wir fügen playsinline=1 hinzu, das ist wichtig für iOS
+            const videoUrl = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1`;
+            document.getElementById('video-player').src = videoUrl; 
+        } 
+    }
     function stopVideo() { document.getElementById('video-player').src = ""; }
 
     function revealInfo() {

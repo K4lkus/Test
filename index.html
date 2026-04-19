@@ -266,35 +266,44 @@
     }
 
     async function pickRandomSong() {
-    // 1. Undo-Logik wie gehabt
-    if (currentSong) {
-        lastSong = currentSong; 
-        if (document.getElementById('undo-btn')) document.getElementById('undo-btn').classList.remove('hidden');
-    }
-
-    playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
-    let pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
-    
-    // 2. PRÜFUNG: Ist der Pool leer?
-    if (pool.length === 0) {
-        const autoNext = confirm("Diese Box ist leer! Möchtest du automatisch das nächste verfügbare Paket laden, um die Runde fortzusetzen?");
-        
-        if (autoNext) {
-            if (!await loadNextBox()) {
-                alert("Keine weiteren Pakete in dieser Kategorie gefunden.");
-                return;
-            }
-            // Pool nach dem Laden der neuen Box aktualisieren
-            pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
-        } else {
-            return;
+        // 1. Undo-Logik: Den aktuellen Song als "letzten Song" merken
+        if (currentSong) {
+            lastSong = currentSong; 
+            const undoBtn = document.getElementById('undo-btn');
+            if (undoBtn) undoBtn.classList.remove('hidden');
         }
-    }
 
-    // 3. Song auswählen und anzeigen
-    currentSong = pool[Math.floor(Math.random() * pool.length)];
-    displaySong(currentSong);
-}
+        // 2. Den Pool der noch nicht gespielten Songs laden
+        playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
+        let pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
+    
+        // 3. PRÜFUNG: Ist der Pool leer?
+        if (pool.length === 0) {
+            const autoNext = confirm("Diese Box ist leer! Möchtest du das nächste Paket in dieser Kategorie laden, um weiterzuspielen?");
+        
+            if (autoNext) {
+                // Wir warten, bis die nächste Box geladen wurde
+                const success = await loadNextBox(); 
+            
+                if (success) {
+                    // Den Pool mit den neu geladenen Songs aktualisieren
+                    pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
+                    alert("Nächstes Paket erfolgreich hinzugefügt!");
+                } else {
+                    alert("Keine weiteren Pakete in dieser Kategorie gefunden. Das Spiel ist zu Ende!");
+                    return; // Beendet die Funktion, wenn nichts mehr da ist
+                }
+            } else {
+                return; // Beendet die Funktion, wenn der Nutzer nicht wechseln will
+            }
+        }
+
+        // 4. Zufälligen Song aus dem (evtl. neuen) Pool auswählen
+        currentSong = pool[Math.floor(Math.random() * pool.length)];
+    
+        // 5. Song im UI anzeigen
+        displaySong(currentSong);
+    }
 
     async function loadNextBox() {
         const currentKat = document.getElementById('category-dropdown').value;

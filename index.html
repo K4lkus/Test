@@ -408,7 +408,7 @@
         if(currentSong) {
             // Wichtig: mute=0 (mit Ton) aber autoplay=1
             // playsinline=1 ist der heilige Gral für iPhones
-            const videoUrl = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&enablejsapi=1`;
+            const videoUrl = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&enablejsapi=1&mute=0&origin=${window.location.origin}`;
         
             const player = document.getElementById('video-player');
             player.src = videoUrl; 

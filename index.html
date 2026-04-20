@@ -39,7 +39,6 @@
             position: relative;
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
             background: #000;
-            display: none;
             opacity: 1;
         }
 
@@ -218,11 +217,21 @@
 
     function startVideo() {
         if(!currentSong) return;
-        // iOS-spezifische URL
-        const url = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&mute=0&enablejsapi=1`;
-        document.getElementById('video-player').src = url;
+    
+        const player = document.getElementById('video-player');
+    
+        // Die URL OHNE Autoplay-Parameter zuerst setzen, um den Kanal zu öffnen
+        // Dann mit Autoplay und mute=0 erzwingen
+        const url = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&mute=0&enablejsapi=1&origin=${window.location.origin}`;
+    
+        player.src = url;
+
+        // Optisches Feedback
         document.getElementById('video-wrapper').classList.add('playing');
         document.getElementById('status').innerText = "🎵 Musik läuft...";
+    
+        // Kleiner Trick für iOS: Fokus auf den Player setzen
+        player.focus();
     }
 
     function stopVideo() {

@@ -15,7 +15,6 @@
             padding: 0;
             background-image: linear-gradient(180deg, #0d0221 0%, #0f0c29 100%); 
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .card { 
@@ -28,62 +27,40 @@
             max-width: 90%; 
         }
 
-        /* iOS Player */
         #video-wrapper {
-            width: 220px;
-            height: 220px;
-            margin: 15px auto;
-            border-radius: 50%;
-            border: 6px solid #00d4ff;
-            overflow: hidden;
-            position: relative;
+            width: 220px; height: 220px; margin: 15px auto;
+            border-radius: 50%; border: 6px solid #00d4ff;
+            overflow: hidden; position: relative;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
             background: #000;
         }
 
         #video-player {
-            position: absolute;
-            top: 50%;
-            left: 50%;
+            position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 160%; 
-            height: 160%;
+            width: 160%; height: 160%;
             pointer-events: auto;
         }
 
-        /* Tutorial Overlay Fix */
+        /* Tutorial Overlay */
         #tutorial-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95);
-            z-index: 9999; /* Sehr hoch setzen */
-            display: none; /* Standardmäßig aus */
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            z-index: 10000; display: none;
+            align-items: center; justify-content: center; padding: 20px;
         }
 
         .tutorial-content {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 20px;
-            border: 2px solid #00d4ff;
-            max-width: 400px;
-            color: white;
+            background: #1a1a2e; padding: 30px; border-radius: 20px;
+            border: 2px solid #00d4ff; max-width: 400px;
         }
 
         .hidden { display: none; }
         
         button { 
-            background: #ff0055; 
-            border: none; 
-            color: white; 
-            padding: 12px 24px; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            font-size: 1em; 
-            margin: 5px; 
-            font-weight: bold; 
+            background: #ff0055; border: none; color: white; 
+            padding: 12px 24px; border-radius: 50px; 
+            cursor: pointer; font-size: 1em; margin: 5px; font-weight: bold; 
         }
 
         .btn-secondary { background: #00d4ff; }
@@ -100,8 +77,7 @@
         .player-score { background: rgba(20, 20, 35, 0.9); padding: 10px; border-radius: 12px; min-width: 120px; border: 1px solid #444; }
         .score-val { font-size: 1.5em; color: #bcff00; display: block; }
         
-        input { background: #1a1a2e; border: 1px solid #444; color: white; margin: 5px; padding: 10px; border-radius: 10px; width: 80%; }
-        select { padding: 10px; border-radius: 10px; margin: 5px; background: #1a1a2e; color: white; border: 1px solid #444; }
+        input, select { background: #1a1a2e; border: 1px solid #444; color: white; margin: 5px; padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -110,8 +86,8 @@
         <div class="tutorial-content">
             <h2>📖 Kurz-Anleitung</h2>
             <ul style="text-align: left; line-height: 1.6;">
-                <li>Wähle <b>🎲 Nächster Song</b>.</li>
-                <li>Tippe danach auf das <b>YouTube-Symbol im Kreis</b>, um die Musik zu starten.</li>
+                <li>Drücke auf <b>🎲 Nächster Song</b>.</li>
+                <li>Tippe danach auf das <b>YouTube-Symbol im Kreis</b>, um die Musik zu hören.</li>
                 <li>Rate das Jahr und decke die <b>Lösung</b> auf!</li>
             </ul>
             <button onclick="closeTutorial()" style="width: 100%; margin-top: 20px;">Verstanden & Start! 🚀</button>
@@ -125,15 +101,14 @@
         <select id="box-dropdown"></select>
         
         <div id="player-selection">
-            <p>Anzahl der Spieler:</p>
+            <p>Spieleranzahl:</p>
             <button onclick="createPlayerInputs(2)">2 Spieler</button>
             <button onclick="createPlayerInputs(3)">3 Spieler</button>
             <button onclick="createPlayerInputs(4)">4 Spieler</button>
         </div>
 
         <div id="name-inputs" style="margin-top: 20px;"></div>
-        
-        <button id="start-game-btn" class="hidden" onclick="triggerStartSequence()">Spiel starten 🚀</button>
+        <button id="start-game-btn" class="hidden" onclick="showTutorial()">Spiel starten 🚀</button>
     </div>
 
     <div id="game-area" class="hidden">
@@ -143,14 +118,55 @@
 
         <div class="card">
             <h2 id="status">Bereit?</h2>
-            
             <div id="video-wrapper">
                 <iframe id="video-player" src="" frameborder="0" allow="autoplay; encrypted-media; playsinline"></iframe>
             </div>
-
             <button onclick="pickRandomSong()" style="background: #1DB954;">🎲 Nächster Song</button>
-            
             <div id="controls" class="hidden">
                 <button onclick="stopVideo()" style="background: #cc0000;">⏹️ Musik Stopp</button>
                 <br>
-                <button onclick="revealInfo()" class="btn
+                <button onclick="revealInfo()" class="btn-secondary" style="margin-top:10px;">👁️ Lösung anzeigen</button>
+            </div>
+            <div id="song-info" class="hidden">
+                <h3 id="display-title" style="color: #bcff00;"></h3>
+                <p id="display-year"></p>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; font-size: 0.8em;">
+            <p id="db-count"></p>
+            <button onclick="resetGame()" class="btn-danger" style="font-size: 0.7em;">❌ Reset & Menü</button>
+        </div>
+    </div>
+
+<script>
+    const quizDaten = {
+        "Vinyl-Singles": {
+            "Box 1": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJkS7ZgyqTEyjfOdiQ0wFlhllm_ZeQHQo9S5z597Jq7ejqKjVjZRTIg9FHoaEx-rGGhsOCAEg5PL1G/pub?output=csv",
+            "Box 2": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzYclEUZUBUMy_NurHcMxlTxKKrmAXrJvSgjXuWw8K-IJIvKujFNNhWLTOXgPCUGCZQshmA-7m1bf1/pub?output=csv"
+        }
+    };
+
+    let songDatenbank = [];
+    let players = [];
+    let currentSong = null;
+    let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
+
+    // Initialisierung beim Laden
+    function initDropdowns() {
+        const catDrop = document.getElementById('category-dropdown');
+        catDrop.innerHTML = "";
+        for (let kat in quizDaten) {
+            let opt = document.createElement('option');
+            opt.value = kat; opt.textContent = kat; catDrop.appendChild(opt);
+        }
+        updateBoxDropdown();
+    }
+
+    function updateBoxDropdown() {
+        const kat = document.getElementById('category-dropdown').value;
+        const boxDrop = document.getElementById('box-dropdown');
+        boxDrop.innerHTML = "";
+        if (quizDaten[kat]) {
+            for (let box in quizDaten[kat]) {
+                let opt = document.createElement('option');

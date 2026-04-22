@@ -11,9 +11,11 @@
             text-align: center; 
             background-color: #0d0221; 
             color: #e0e0e0; 
-            margin: 0; padding: 0;
+            margin: 0; 
+            padding: 0;
             background-image: linear-gradient(180deg, #0d0221 0%, #0f0c29 100%); 
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .card { 
@@ -26,41 +28,46 @@
             max-width: 90%; 
         }
 
+        /* Der iOS-optimierte Schallplatten-Player */
         #video-wrapper {
-            width: 220px; height: 220px; margin: 15px auto;
-            border-radius: 50%; border: 6px solid #00d4ff;
-            overflow: hidden; position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 15px auto;
+            border-radius: 50%;
+            border: 6px solid #00d4ff;
+            overflow: hidden;
+            position: relative;
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
             background: #000;
         }
 
         #video-player {
-            position: absolute; top: 50%; left: 50%;
+            position: absolute;
+            /* Zentriert den YouTube-Playbutton in der Mitte des Kreises */
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            width: 160%; height: 160%;
-            pointer-events: auto;
+            width: 160%; 
+            height: 160%;
+            pointer-events: auto; /* Erlaubt das Klicken direkt auf YouTube */
         }
 
-        /* Tutorial Overlay */
-        #tutorial-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 10000; 
-            display: none; /* Wird per JS auf flex gesetzt */
-            align-items: center; justify-content: center; padding: 20px;
-        }
-
-        .tutorial-content {
-            background: #1a1a2e; padding: 30px; border-radius: 20px;
-            border: 2px solid #00d4ff; max-width: 400px;
-        }
+        .playing { animation: spin 4s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         .hidden { display: none; }
         
         button { 
-            background: #ff0055; border: none; color: white; 
-            padding: 12px 24px; border-radius: 50px; 
-            cursor: pointer; font-size: 1em; margin: 5px; font-weight: bold; 
+            background: #ff0055; 
+            border: none; 
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-size: 1em; 
+            margin: 5px; 
+            font-weight: bold; 
+            transition: all 0.3s ease; 
         }
 
         .btn-secondary { background: #00d4ff; }
@@ -76,35 +83,182 @@
         .scoreboard { display: flex; overflow-x: auto; justify-content: center; gap: 10px; padding: 10px; }
         .player-score { background: rgba(20, 20, 35, 0.9); padding: 10px; border-radius: 12px; min-width: 120px; border: 1px solid #444; }
         .score-val { font-size: 1.5em; color: #bcff00; display: block; }
+        .timeline { height: 80px; overflow-y: auto; font-size: 0.7em; margin-top: 5px; border-top: 1px solid #333; }
         
-        input, select { background: #1a1a2e; border: 1px solid #444; color: white; margin: 5px; padding: 10px; border-radius: 10px; font-size: 1em; }
+        input { background: #1a1a2e; border: 1px solid #444; color: white; margin: 5px; padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="tutorial-overlay">
-        <div class="tutorial-content">
-            <h2>📖 Kurz-Anleitung</h2>
-            <ul style="text-align: left; line-height: 1.6;">
-                <li>Drücke auf <b>🎲 Nächster Song</b>.</li>
-                <li>Tippe danach auf das <b>YouTube-Symbol im Kreis</b>, um die Musik zu hören.</li>
-                <li>Rate das Jahr und decke die <b>Lösung</b> auf!</li>
-            </ul>
-            <button onclick="closeTutorial()" style="width: 100%; margin-top: 20px;">Verstanden & Start! 🚀</button>
-        </div>
-    </div>
-
     <div id="setup-area" class="card">
         <h2>🎮 Quiz-Setup 🎮</h2>
         <p>Kategorie & Paket wählen:</p>
-        <select id="category-dropdown"></select>
+        <select id="category-dropdown" onchange="updateBoxDropdown()"></select>
         <select id="box-dropdown"></select>
-        
-        <div id="player-selection" style="margin-top: 20px;">
-            <p>Spieleranzahl wählen:</p>
+        <div id="name-inputs">
             <button onclick="createPlayerInputs(2)">2 Spieler</button>
             <button onclick="createPlayerInputs(3)">3 Spieler</button>
             <button onclick="createPlayerInputs(4)">4 Spieler</button>
         </div>
+        <button id="start-game-btn" class="hidden" onclick="startGame()">Spiel starten 🚀</button>
+    </div>
 
-        <div id="name-inputs
+    <div id="game-area" class="hidden">
+        <div id="sticky-header">
+            <div id="scoreboard" class="scoreboard"></div>
+        </div>
+
+        <div class="card">
+            <h2 id="status">Bereit?</h2>
+            
+            <div id="video-wrapper">
+                <iframe id="video-player" src="" frameborder="0" allow="autoplay; encrypted-media; playsinline"></iframe>
+            </div>
+
+            <button onclick="pickRandomSong()" style="background: #1DB954;">🎲 Nächster Song</button>
+            
+            <div id="controls" class="hidden">
+                <button onclick="stopVideo()" style="background: #cc0000;">⏹️ Musik Stopp</button>
+                <br>
+                <button onclick="revealInfo()" class="btn-secondary" style="margin-top:10px;">👁️ Lösung anzeigen</button>
+            </div>
+
+            <div id="song-info" class="hidden">
+                <h3 id="display-title" style="color: #bcff00;"></h3>
+                <p id="display-year"></p>
+            </div>
+        </div>
+
+        <div id="db-info" style="margin-top: 20px; font-size: 0.8em;">
+            <p id="db-count">Lade Pool...</p>
+            <button onclick="resetGame()" class="btn-danger" style="font-size: 0.7em;">❌ Reset & Menü</button>
+        </div>
+    </div>
+
+<script>
+    const quizDaten = {
+        "Vinyl-Singles": {
+            "Box 1": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJkS7ZgyqTEyjfOdiQ0wFlhllm_ZeQHQo9S5z597Jq7ejqKjVjZRTIg9FHoaEx-rGGhsOCAEg5PL1G/pub?output=csv",
+            "Box 2": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzYclEUZUBUMy_NurHcMxlTxKKrmAXrJvSgjXuWw8K-IJIvKujFNNhWLTOXgPCUGCZQshmA-7m1bf1/pub?output=csv"
+        }
+    };
+
+    let songDatenbank = [];
+    let players = [];
+    let currentSong = null;
+    let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
+
+    window.onload = () => {
+        const catDrop = document.getElementById('category-dropdown');
+        for (let kat in quizDaten) {
+            let opt = document.createElement('option');
+            opt.value = kat; opt.innerHTML = kat; catDrop.appendChild(opt);
+        }
+        updateBoxDropdown();
+    };
+
+    function updateBoxDropdown() {
+        const kat = document.getElementById('category-dropdown').value;
+        const boxDrop = document.getElementById('box-dropdown');
+        boxDrop.innerHTML = "";
+        for (let box in quizDaten[kat]) {
+            let opt = document.createElement('option');
+            opt.value = quizDaten[kat][box]; opt.innerHTML = box; boxDrop.appendChild(opt);
+        }
+    }
+
+    async function loadSongs(url) {
+        try {
+            const response = await fetch(url);
+            const data = await response.text();
+            const rows = data.split(/\r?\n/).slice(1);
+            songDatenbank = rows.map(row => {
+                const col = row.split(row.includes(';') ? ';' : ',');
+                return { ytId: col[0]?.trim(), titel: col[1]?.trim(), interpret: col[2]?.trim(), jahr: col[3]?.trim() };
+            }).filter(s => s.ytId);
+            updateDbCounter();
+            return true;
+        } catch (e) { alert("Fehler: Liste konnte nicht geladen werden."); return false; }
+    }
+
+    function createPlayerInputs(num) {
+        const div = document.getElementById('name-inputs');
+        div.innerHTML = "";
+        for(let i=1; i<=num; i++) div.innerHTML += `<input type="text" id="p${i}" placeholder="Name ${i}">`;
+        document.getElementById('start-game-btn').classList.remove('hidden');
+    }
+
+    async function startGame() {
+        const url = document.getElementById('box-dropdown').value;
+        if(await loadSongs(url)) {
+            const inps = document.querySelectorAll('#name-inputs input');
+            players = Array.from(inps).map(id => ({ name: id.value || "Spieler", score: 0, timeline: [] }));
+            document.getElementById('setup-area').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            renderScoreboard();
+        }
+    }
+
+    function updateDbCounter() {
+        const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
+        document.getElementById('db-count').innerHTML = `Pool: ${pool.length} | Gespielt: ${playedSongIds.length}`;
+    }
+
+    function pickRandomSong() {
+        const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
+        if(pool.length === 0) return alert("Box leer!");
+        currentSong = pool[Math.floor(Math.random() * pool.length)];
+        
+        document.getElementById('status').innerText = "Tippe auf die Platte!";
+        
+        // Video laden: modestbranding & rel=0 für saubere Optik
+        const player = document.getElementById('video-player');
+        player.src = `https://www.youtube.com/embed/${currentSong.ytId}?playsinline=1&modestbranding=1&rel=0`;
+
+        document.getElementById('controls').classList.remove('hidden');
+        document.getElementById('song-info').classList.add('hidden');
+        document.getElementById('video-wrapper').classList.remove('playing');
+    }
+
+    function stopVideo() {
+        document.getElementById('video-player').src = "";
+        document.getElementById('video-wrapper').classList.remove('playing');
+        document.getElementById('status').innerText = "Gestoppt";
+    }
+
+    function revealInfo() {
+        stopVideo();
+        document.getElementById('song-info').classList.remove('hidden');
+        document.getElementById('display-title').innerText = `${currentSong.titel} - ${currentSong.interpret}`;
+        document.getElementById('display-year').innerText = `Jahr: ${currentSong.jahr}`;
+        if(!playedSongIds.includes(currentSong.ytId)) {
+            playedSongIds.push(currentSong.ytId);
+            localStorage.setItem('hitster_played_songs', JSON.stringify(playedSongIds));
+            updateDbCounter();
+        }
+    }
+
+    function renderScoreboard() {
+        const sb = document.getElementById('scoreboard');
+        sb.innerHTML = players.map((p, i) => `
+            <div class="player-score">
+                <strong>${p.name}</strong>
+                <span class="score-val">${p.score}</span>
+                <button onclick="addPoint(${i})" style="padding:5px 10px; font-size:0.7em;">+1 Punkt</button>
+                <div class="timeline">${p.timeline.map(s => `<div>${s}</div>`).join("")}</div>
+            </div>
+        `).join("");
+    }
+
+    function addPoint(idx) {
+        if(!currentSong) return;
+        players[idx].timeline.push(`${currentSong.jahr} - ${currentSong.titel}`);
+        players[idx].score = players[idx].timeline.length;
+        renderScoreboard();
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function resetGame() { if(confirm("Alles löschen?")) { localStorage.clear(); location.reload(); } }
+</script>
+</body>
+</html>

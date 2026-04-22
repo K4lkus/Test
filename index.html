@@ -28,30 +28,31 @@
             max-width: 90%; 
         }
 
-        /* Der iOS-sichere Schallplatten-Player */
+        /* Der iOS-optimierte Schallplatten-Player */
         #video-wrapper {
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             margin: 15px auto;
             border-radius: 50%;
-            border: 4px solid #00d4ff;
+            border: 6px solid #00d4ff;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
             background: #000;
-            opacity: 1;
         }
 
         #video-player {
             position: absolute;
-            top: -50px;
-            left: -50px;
-            width: 300px;
-            height: 300px;
-            pointer-events: none;
+            /* Zentriert den YouTube-Playbutton in der Mitte des Kreises */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160%; 
+            height: 160%;
+            pointer-events: auto; /* Erlaubt das Klicken direkt auf YouTube */
         }
 
-        .playing { animation: spin 3s linear infinite; }
+        .playing { animation: spin 4s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         .hidden { display: none; }
@@ -83,6 +84,8 @@
         .player-score { background: rgba(20, 20, 35, 0.9); padding: 10px; border-radius: 12px; min-width: 120px; border: 1px solid #444; }
         .score-val { font-size: 1.5em; color: #bcff00; display: block; }
         .timeline { height: 80px; overflow-y: auto; font-size: 0.7em; margin-top: 5px; border-top: 1px solid #333; }
+        
+        input { background: #1a1a2e; border: 1px solid #444; color: white; margin: 5px; padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -115,10 +118,9 @@
             <button onclick="pickRandomSong()" style="background: #1DB954;">🎲 Nächster Song</button>
             
             <div id="controls" class="hidden">
-                <button onclick="startVideo()" style="background: white; color: black;">▶️ Play</button>
-                <button onclick="stopVideo()" style="background: #cc0000;">⏹️ Stopp</button>
+                <button onclick="stopVideo()" style="background: #cc0000;">⏹️ Musik Stopp</button>
                 <br>
-                <button onclick="revealInfo()" class="btn-secondary" style="margin-top:10px;">👁️ Lösung</button>
+                <button onclick="revealInfo()" class="btn-secondary" style="margin-top:10px;">👁️ Lösung anzeigen</button>
             </div>
 
             <div id="song-info" class="hidden">
@@ -176,13 +178,13 @@
             }).filter(s => s.ytId);
             updateDbCounter();
             return true;
-        } catch (e) { alert("iPad-Fehler: Liste konnte nicht geladen werden."); return false; }
+        } catch (e) { alert("Fehler: Liste konnte nicht geladen werden."); return false; }
     }
 
     function createPlayerInputs(num) {
         const div = document.getElementById('name-inputs');
         div.innerHTML = "";
-        for(let i=1; i<=num; i++) div.innerHTML += `<input type="text" id="p${i}" placeholder="Name ${i}" style="margin:5px; padding:10px; border-radius:10px;">`;
+        for(let i=1; i<=num; i++) div.innerHTML += `<input type="text" id="p${i}" placeholder="Name ${i}">`;
         document.getElementById('start-game-btn').classList.remove('hidden');
     }
 
@@ -199,7 +201,7 @@
 
     function updateDbCounter() {
         const pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
-        document.getElementById('db-count').innerHTML = `Pool: ${pool.length} | Gespielt: ${playedSongIds.length} | Gesamt: ${songDatenbank.length}`;
+        document.getElementById('db-count').innerHTML = `Pool: ${pool.length} | Gespielt: ${playedSongIds.length}`;
     }
 
     function pickRandomSong() {
@@ -207,36 +209,21 @@
         if(pool.length === 0) return alert("Box leer!");
         currentSong = pool[Math.floor(Math.random() * pool.length)];
         
-        document.getElementById('status').innerText = "Song bereit!";
-        document.getElementById('video-wrapper').style.display = "block";
-        document.getElementById('video-player').src = "";
+        document.getElementById('status').innerText = "Tippe auf die Platte!";
+        
+        // Video laden: modestbranding & rel=0 für saubere Optik
+        const player = document.getElementById('video-player');
+        player.src = `https://www.youtube.com/embed/${currentSong.ytId}?playsinline=1&modestbranding=1&rel=0`;
+
         document.getElementById('controls').classList.remove('hidden');
         document.getElementById('song-info').classList.add('hidden');
         document.getElementById('video-wrapper').classList.remove('playing');
     }
 
-    function startVideo() {
-        if(!currentSong) return;
-    
-        const player = document.getElementById('video-player');
-    
-        // Die URL OHNE Autoplay-Parameter zuerst setzen, um den Kanal zu öffnen
-        // Dann mit Autoplay und mute=0 erzwingen
-        const url = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&mute=0&enablejsapi=1&origin=${window.location.origin}`;
-    
-        player.src = url;
-
-        // Optisches Feedback
-        document.getElementById('video-wrapper').classList.add('playing');
-        document.getElementById('status').innerText = "🎵 Musik läuft...";
-    
-        // Kleiner Trick für iOS: Fokus auf den Player setzen
-        player.focus();
-    }
-
     function stopVideo() {
         document.getElementById('video-player').src = "";
         document.getElementById('video-wrapper').classList.remove('playing');
+        document.getElementById('status').innerText = "Gestoppt";
     }
 
     function revealInfo() {
@@ -257,7 +244,7 @@
             <div class="player-score">
                 <strong>${p.name}</strong>
                 <span class="score-val">${p.score}</span>
-                <button onclick="addPoint(${i})" style="padding:5px 10px; font-size:0.7em;">+1</button>
+                <button onclick="addPoint(${i})" style="padding:5px 10px; font-size:0.7em;">+1 Punkt</button>
                 <div class="timeline">${p.timeline.map(s => `<div>${s}</div>`).join("")}</div>
             </div>
         `).join("");
@@ -268,6 +255,7 @@
         players[idx].timeline.push(`${currentSong.jahr} - ${currentSong.titel}`);
         players[idx].score = players[idx].timeline.length;
         renderScoreboard();
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }
 
     function resetGame() { if(confirm("Alles löschen?")) { localStorage.clear(); location.reload(); } }

@@ -52,7 +52,6 @@
             background: #0d0221;
             display: flex; align-items: center; justify-content: center;
             z-index: 20;
-            transition: opacity 0.4s ease;
         }
 
         #video-cover::after {
@@ -201,6 +200,9 @@
             opt.value = kat; opt.textContent = kat; catDrop.appendChild(opt);
         }
         updateBoxDropdown();
+
+        // Zeigt das Tutorial beim Start automatisch an
+        toggleTutorial(); 
     };
 
     function updateBoxDropdown() {
@@ -283,35 +285,55 @@
     }
 
     function pickRandomSong() {
+        // 1. POOL FILTERN
+        // Es werden nur Songs gewählt, die in dieser Sitzung noch nicht dran waren.
         let pool = songDatenbank.filter(s => !playedSongIds.includes(s.ytId));
         if (pool.length === 0) return alert("Box leer!");
-    
-        if (currentSong) lastSong = currentSong;
+
+        // 2. SONG-HISTORY (UNDO-FUNKTION)
+        // Bevor der neue Song kommt, merken wir uns den aktuellen als "lastSong".
+        if (currentSong) {
+            lastSong = currentSong;
+            document.getElementById('undo-btn').classList.remove('hidden');
+        }
+
+        // 3. ZUFALLSWAHL
+        // Ein neuer Song wird aus dem Pool gezogen.
         currentSong = pool[Math.floor(Math.random() * pool.length)];
 
-        // UI Zurücksetzen für neuen Song
-        document.getElementById('status').innerText = "Bereit? Tippe auf die Note!";
+        // 4. UI RESET (DAS TUCH)
+        // Ganz wichtig: Hier stellen wir sicher, dass das Tuch blickdicht oben liegt,
+        // bevor das Video geladen wird. So wird kein Vorschaubild ("Schummeln") gesehen.
         const cover = document.getElementById('video-cover');
         cover.style.display = "flex";
         cover.style.opacity = "1";
-        
-        // WICHTIG: enablejsapi=1 für iOS Steuerung
-        document.getElementById('video-player').src = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1`;
-        
+        document.getElementById('status').innerText = "Bereit? Tippe auf die Note!";
+
+        // 5. PLAYER LADEN (iOS OPTIMIERT)
+        // Die URL wird in das Iframe geladen. 
+        // "enablejsapi=1" erlaubt uns, den Ton später per Klick zu starten.
+        // "autoplay=1" versucht zu starten, "playsinline=1" verhindert den Vollbildmodus.
+        document.getElementById('video-player').src = 
+            `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1`;
+
+        // Controls einblenden, Song-Info (Lösung) verstecken
         document.getElementById('controls').classList.remove('hidden');
         document.getElementById('song-info').classList.add('hidden');
-        if (lastSong) document.getElementById('undo-btn').classList.remove('hidden');
     }
 
     function handleCoverClick() {
-        const cover = document.getElementById('video-cover');
-        cover.style.opacity = "0";
-        setTimeout(() => { cover.style.display = "none"; }, 400);
-        document.getElementById('status').innerText = "Hör genau hin...";
-        
-        // iOS Play Trigger
+        // Das Tuch bleibt SICHTBAR (wir löschen die Zeilen, die es verstecken)
+    
+        document.getElementById('status').innerText = "Musik läuft...";
+
+        // Der wichtigste Teil für iOS: Der Klick triggert den Sound
         const player = document.getElementById('video-player');
         player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+
+        // Optisches Feedback: Die Note kurz vergrößern, damit man merkt, dass gedrückt wurde
+        const cover = document.getElementById('video-cover');
+        cover.style.transform = "scale(1.1)";
+        setTimeout(() => { cover.style.transform = "scale(1)"; }, 200);
     }
 
     function stopVideo() { document.getElementById('video-player').src = ""; }

@@ -11,8 +11,7 @@
             text-align: center; 
             background-color: #0d0221; 
             color: #e0e0e0; 
-            margin: 0; 
-            padding: 0;
+            margin: 0; padding: 0;
             background-image: linear-gradient(180deg, #0d0221 0%, #0f0c29 100%); 
             min-height: 100vh;
         }
@@ -46,7 +45,8 @@
         #tutorial-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95);
-            z-index: 10000; display: none;
+            z-index: 10000; 
+            display: none; /* Wird per JS auf flex gesetzt */
             align-items: center; justify-content: center; padding: 20px;
         }
 
@@ -77,7 +77,7 @@
         .player-score { background: rgba(20, 20, 35, 0.9); padding: 10px; border-radius: 12px; min-width: 120px; border: 1px solid #444; }
         .score-val { font-size: 1.5em; color: #bcff00; display: block; }
         
-        input, select { background: #1a1a2e; border: 1px solid #444; color: white; margin: 5px; padding: 10px; border-radius: 10px; }
+        input, select { background: #1a1a2e; border: 1px solid #444; color: white; margin: 5px; padding: 10px; border-radius: 10px; font-size: 1em; }
     </style>
 </head>
 <body>
@@ -97,76 +97,14 @@
     <div id="setup-area" class="card">
         <h2>🎮 Quiz-Setup 🎮</h2>
         <p>Kategorie & Paket wählen:</p>
-        <select id="category-dropdown" onchange="updateBoxDropdown()"></select>
+        <select id="category-dropdown"></select>
         <select id="box-dropdown"></select>
         
-        <div id="player-selection">
-            <p>Spieleranzahl:</p>
+        <div id="player-selection" style="margin-top: 20px;">
+            <p>Spieleranzahl wählen:</p>
             <button onclick="createPlayerInputs(2)">2 Spieler</button>
             <button onclick="createPlayerInputs(3)">3 Spieler</button>
             <button onclick="createPlayerInputs(4)">4 Spieler</button>
         </div>
 
-        <div id="name-inputs" style="margin-top: 20px;"></div>
-        <button id="start-game-btn" class="hidden" onclick="showTutorial()">Spiel starten 🚀</button>
-    </div>
-
-    <div id="game-area" class="hidden">
-        <div id="sticky-header">
-            <div id="scoreboard" class="scoreboard"></div>
-        </div>
-
-        <div class="card">
-            <h2 id="status">Bereit?</h2>
-            <div id="video-wrapper">
-                <iframe id="video-player" src="" frameborder="0" allow="autoplay; encrypted-media; playsinline"></iframe>
-            </div>
-            <button onclick="pickRandomSong()" style="background: #1DB954;">🎲 Nächster Song</button>
-            <div id="controls" class="hidden">
-                <button onclick="stopVideo()" style="background: #cc0000;">⏹️ Musik Stopp</button>
-                <br>
-                <button onclick="revealInfo()" class="btn-secondary" style="margin-top:10px;">👁️ Lösung anzeigen</button>
-            </div>
-            <div id="song-info" class="hidden">
-                <h3 id="display-title" style="color: #bcff00;"></h3>
-                <p id="display-year"></p>
-            </div>
-        </div>
-
-        <div style="margin-top: 20px; font-size: 0.8em;">
-            <p id="db-count"></p>
-            <button onclick="resetGame()" class="btn-danger" style="font-size: 0.7em;">❌ Reset & Menü</button>
-        </div>
-    </div>
-
-<script>
-    const quizDaten = {
-        "Vinyl-Singles": {
-            "Box 1": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJkS7ZgyqTEyjfOdiQ0wFlhllm_ZeQHQo9S5z597Jq7ejqKjVjZRTIg9FHoaEx-rGGhsOCAEg5PL1G/pub?output=csv",
-            "Box 2": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzYclEUZUBUMy_NurHcMxlTxKKrmAXrJvSgjXuWw8K-IJIvKujFNNhWLTOXgPCUGCZQshmA-7m1bf1/pub?output=csv"
-        }
-    };
-
-    let songDatenbank = [];
-    let players = [];
-    let currentSong = null;
-    let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
-
-    // Initialisierung beim Laden
-    function initDropdowns() {
-        const catDrop = document.getElementById('category-dropdown');
-        catDrop.innerHTML = "";
-        for (let kat in quizDaten) {
-            let opt = document.createElement('option');
-            opt.value = kat; opt.textContent = kat; catDrop.appendChild(opt);
-        }
-        updateBoxDropdown();
-    }
-
-    function updateBoxDropdown() {
-        const kat = document.getElementById('category-dropdown').value;
-        const boxDrop = document.getElementById('box-dropdown');
-        boxDrop.innerHTML = "";
-        if (quizDaten[kat]) {
-            for (let box in quizDaten[kat]) {
-                let opt = document.createElement('option');
+        <div id="name-inputs

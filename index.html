@@ -28,7 +28,7 @@
             max-width: 90%; 
         }
 
-        /* Der iOS-optimierte Schallplatten-Player */
+        /* iOS-optimierter Player */
         #video-wrapper {
             width: 220px;
             height: 220px;
@@ -43,13 +43,33 @@
 
         #video-player {
             position: absolute;
-            /* Zentriert den YouTube-Playbutton in der Mitte des Kreises */
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 160%; 
             height: 160%;
-            pointer-events: auto; /* Erlaubt das Klicken direkt auf YouTube */
+            pointer-events: auto;
+        }
+
+        /* Tutorial Overlay */
+        #tutorial-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .tutorial-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid #00d4ff;
+            max-width: 400px;
         }
 
         .playing { animation: spin 4s linear infinite; }
@@ -90,6 +110,18 @@
 </head>
 <body>
 
+    <div id="tutorial-overlay" class="hidden">
+        <div class="tutorial-content">
+            <h2>📖 Kurz-Anleitung</h2>
+            <ul style="text-align: left; line-height: 1.6;">
+                <li>Klicke auf <b>🎲 Nächster Song</b>, um eine neue Runde zu starten.</li>
+                <li><b>Wichtig auf dem iPad:</b> Tippe danach direkt in die <b>Mitte des Kreises</b> auf das rote YouTube-Symbol, um die Musik zu starten.</li>
+                <li>Rate das Jahr und decke dann die <b>Lösung</b> auf!</li>
+            </ul>
+            <button onclick="closeTutorial()" style="width: 100%; margin-top: 20px;">Alles klar, Los geht's! 🚀</button>
+        </div>
+    </div>
+
     <div id="setup-area" class="card">
         <h2>🎮 Quiz-Setup 🎮</h2>
         <p>Kategorie & Paket wählen:</p>
@@ -100,7 +132,7 @@
             <button onclick="createPlayerInputs(3)">3 Spieler</button>
             <button onclick="createPlayerInputs(4)">4 Spieler</button>
         </div>
-        <button id="start-game-btn" class="hidden" onclick="startGame()">Spiel starten 🚀</button>
+        <button id="start-game-btn" class="hidden" onclick="showTutorial()">Spiel starten 🚀</button>
     </div>
 
     <div id="game-area" class="hidden">
@@ -178,7 +210,7 @@
             }).filter(s => s.ytId);
             updateDbCounter();
             return true;
-        } catch (e) { alert("Fehler: Liste konnte nicht geladen werden."); return false; }
+        } catch (e) { alert("Fehler beim Laden."); return false; }
     }
 
     function createPlayerInputs(num) {
@@ -186,6 +218,15 @@
         div.innerHTML = "";
         for(let i=1; i<=num; i++) div.innerHTML += `<input type="text" id="p${i}" placeholder="Name ${i}">`;
         document.getElementById('start-game-btn').classList.remove('hidden');
+    }
+
+    function showTutorial() {
+        document.getElementById('tutorial-overlay').classList.remove('hidden');
+    }
+
+    async function closeTutorial() {
+        document.getElementById('tutorial-overlay').classList.add('hidden');
+        await startGame();
     }
 
     async function startGame() {
@@ -209,9 +250,7 @@
         if(pool.length === 0) return alert("Box leer!");
         currentSong = pool[Math.floor(Math.random() * pool.length)];
         
-        document.getElementById('status').innerText = "Tippe auf die Platte!";
-        
-        // Video laden: modestbranding & rel=0 für saubere Optik
+        document.getElementById('status').innerText = "Tippe auf den roten Button!";
         const player = document.getElementById('video-player');
         player.src = `https://www.youtube.com/embed/${currentSong.ytId}?playsinline=1&modestbranding=1&rel=0`;
 

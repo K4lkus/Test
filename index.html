@@ -167,14 +167,13 @@
         <div style="margin-top: 15px;">
             <p id="current-box-info" style="font-size: 0.8em; color: #00d4ff; margin-bottom: 2px;">Paket: -</p>
             <p id="db-count" style="font-size: 0.75em; color: #888;">Lieder im Pool: 0</p>
-            <button onclick="backToMenu()" class="btn-secondary" style="font-size: 0.8em;">📂 Box wechseln</button>
             <button onclick="resetScores()" style="background: #ffa500; color: black; font-size: 0.7em;">🔄 Punkte Reset</button>
             <button onclick="resetGame()" class="btn-danger">❌ Alles löschen & Menü</button>
             <button onclick="toggleFullscreen()" class="btn-secondary" style="font-size: 0.7em; padding: 5px 10px;">📺 Vollbild</button>
         </div>
     </div>
 
-    <div id="tutorial-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center;">
+    <div id="tutorial-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center;">
         <div style="background: #1a1a2e; border: 2px solid #00d4ff; border-radius: 20px; padding: 25px; max-width: 85%; max-height: 80%; overflow-y: auto; box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); color: white;">
             <h2 style="color: #bcff00; margin-top: 0;">📖 Kurzanleitung</h2>
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.7;">
@@ -280,19 +279,9 @@
 
     async function startGame() {
         const url = document.getElementById('box-dropdown').value;
-        const success = await loadSongsFromUrl(url);
-    
-        if (success) {
+        if(await loadSongsFromUrl(url)) {
             const inputs = document.querySelectorAll('#name-inputs input');
-            // Nur Spieler erstellen, wenn noch keine da sind
-            if (!players || players.length === 0) {
-                players = Array.from(inputs).map(inp => ({ 
-                    name: inp.value || "Spieler", 
-                    score: 0, 
-                    timeline: [], 
-                    wins: 0 
-                }));
-            }
+            players = Array.from(inputs).map(inp => ({ name: inp.value || "Spieler", score: 0, timeline: [], wins: 0 }));
             localStorage.setItem('hitster_db_players', JSON.stringify(players));
             showGame();
         }
@@ -541,18 +530,17 @@
 
     function toggleTutorial() {
         const modal = document.getElementById('tutorial-modal');
-        // Wir prüfen einfach: Ist es versteckt? Dann zeig es als Flex-Box. Sonst versteck es.
-        if (modal.style.display === 'none') {
+        if (modal.style.display === 'none' || modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
             modal.style.display = 'flex';
         } else {
+            modal.classList.add('hidden');
             modal.style.display = 'none';
         }
     }
 
     function resetScores() { if(confirm("Punkte dieser Runde löschen?")) { players.forEach(p => {p.score=0; p.timeline=[];}); renderScoreboard(); } }
     function resetGame() { if(confirm("ALLES LÖSCHEN? (Namen, Siege und Sperrliste der Songs)")) { localStorage.clear(); location.reload(); } }
-    function backToMenu() { stopVideo(); document.getElementById('game-area').classList.add('hidden'); document.getElementById('setup-area').classList.remove('hidden');
-}
 </script>
 </body>
 </html>

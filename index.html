@@ -541,14 +541,11 @@
 
     function toggleTutorial() {
         const modal = document.getElementById('tutorial-modal');
-    
-        // Prüfen, ob das Fenster gerade unsichtbar ist
-        if (modal.style.display === 'none' || modal.style.display === '') {
-            modal.style.display = 'flex';     // Anzeigen
-            modal.classList.remove('hidden'); 
+        // Wir prüfen einfach: Ist es versteckt? Dann zeig es als Flex-Box. Sonst versteck es.
+        if (modal.style.display === 'none') {
+            modal.style.display = 'flex';
         } else {
-            modal.style.display = 'none';     // Schließen
-            modal.classList.add('hidden');
+            modal.style.display = 'none';
         }
     }
 

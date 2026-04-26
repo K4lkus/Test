@@ -531,20 +531,35 @@
     }
 
     function undoLastSong() {
-        if (lastSong) {
-            currentPlayerIndex = (currentPlayerIndex - 1 + players.length)  % players.lenght;
+        if (lastSong && players.length > 0) {
+            // 1. Index zurückrechnen
+            currentPlayerIndex = (currentPlayerIndex - 1 + players.length) % players.length;
+
+            // 2. Song zurücksetzen
             currentSong = lastSong;
-            lastSong = null; // Nur einmaliges Zurückgehen erlauben
-            displaySong(currentSong);
-            document.getElementById('undo-btn').classList.add('hidden');
+            lastSong = null;
         
-            // Den Song wieder aus der Sperrliste entfernen, falls er dort schon gelandet ist
+            // ID aus den gespielten Songs entfernen
             playedSongIds = playedSongIds.filter(id => id !== currentSong.ytId);
             localStorage.setItem('hitster_played_songs', JSON.stringify(playedSongIds));
-            updateDbCounter();
-            renderScoreboard();
         
-            alert("Letzter Song wurde wiederhergestellt!");
+            // 3. UI-Elemente
+            const undoBtn = document.getElementById('undo-btn');
+            if (undoBtn) undoBtn.classList.add('hidden');
+        
+            const cover = document.getElementById('video-cover');
+            if (cover) {
+                cover.style.display = "flex";
+                cover.style.opacity = "1";
+            }
+
+            // Video neu laden
+            document.getElementById('video-player').src = `https://www.youtube.com/embed/${currentSong.ytId}?autoplay=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1`;
+        
+            // 4. ALLES AKTUALISIEREN
+ 
+            updateDbCounter();
+            renderScoreboard(); // Das hier MUSS den Rahmen wiederzeichnen
         }
     }
 

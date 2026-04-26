@@ -206,7 +206,8 @@
     let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
     let lastSong = null;
 
-    window.onload = function() {
+    window.onload = async function() {
+        // 1. Kategorien laden
         const catDrop = document.getElementById('category-dropdown');
         for (let kat in quizDaten) {
             let opt = document.createElement('option');
@@ -214,8 +215,15 @@
         }
         updateBoxDropdown();
 
-        // Zeigt das Tutorial beim Start automatisch an
-        toggleTutorial(); 
+        // 2. Prüfen, ob eine Runde läuft (Auto-Fortsetzen)
+        if (players && players.length > 0) {
+            // Wir rufen startGame auf, aber die Funktion muss wissen, 
+            // dass sie die Spieler nicht überschreiben darf.
+            await startGame(); 
+        } else {
+            // Nur wenn keine Runde läuft, zeige das Tutorial
+            toggleTutorial(); 
+        }
     };
 
     function updateBoxDropdown() {

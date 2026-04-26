@@ -114,6 +114,8 @@
         .timeline::-webkit-scrollbar { width: 3px; }
         .timeline::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
 
+        .active-player { border: 3px solid #bcff00 !important; box-shadow: 0 0 15px rgba(188, 255, 0, 0.6); transform: scale(1.05); }
+
         @media screen and (min-width: 900px) { .scoreboard { flex-wrap: wrap; } }
     </style>
 </head>
@@ -222,6 +224,7 @@
     let currentSong = null;
     let lastSong = null;
     let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
+    let currentPlayerIndex = 0;
 
     window.onload = function() {
         const catDropdown = document.getElementById('category-dropdown');
@@ -422,13 +425,15 @@
     function stopVideo() { document.getElementById('video-player').src = ""; }
 
     function revealInfo() {
-        stopVideo();
+        //stopVideo();
         document.getElementById('song-info').classList.remove('hidden');
         if (currentSong && !playedSongIds.includes(currentSong.ytId)) {
             playedSongIds.push(currentSong.ytId);
             localStorage.setItem('hitster_played_songs', JSON.stringify(playedSongIds));
             updateDbCounter();
         }
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        renderScoreboard();
     }
 
     function renderScoreboard() {
@@ -436,10 +441,11 @@
         sb.innerHTML = "";
         players.forEach((p, i) => {
             const isWinner = p.score >= 10;
+            const isAcrive = (i === currentPlayerIndex);
             const sorted = [...p.timeline].sort((a, b) => parseInt(a.jahr) - parseInt(b.jahr));
             const timelineHTML = sorted.map(s => `<div class="timeline-card"><b>${s.jahr}</b> ${s.titel}</div>`).join("");
             sb.innerHTML += `
-                <div class="player-score ${isWinner ? 'winner-glow' : ''}">
+                <div class="player-score ${isWinner ? 'winner-glow' : ''} ${isActive ? 'active-player' : ''}">
                     <small>🏆 ${p.wins || 0}</small><br>
                     <strong class="${isWinner ? 'winner-text' : ''}">${p.name}</strong>
                     <span class="score-val ${isWinner ? 'winner-text' : ''}">${p.score}</span>

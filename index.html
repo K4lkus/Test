@@ -201,7 +201,7 @@
     };
 
     let songDatenbank = [];
-    let players = [];
+    let players = JSON.parse(localStorage.getItem('hitster_players')) || [];
     let currentSong = null;
     let playedSongIds = JSON.parse(localStorage.getItem('hitster_played_songs')) || [];
     let lastSong = null;
@@ -252,6 +252,8 @@
                 const inputs = document.querySelectorAll('#name-inputs input');
                 players = Array.from(inputs).map(inp => ({ name: inp.value || "Spieler", score: 0, timeline: [], wins: 0 }));
             }
+
+            saveGameState();
             
             document.getElementById('setup-area').classList.add('hidden');
             document.getElementById('game-area').classList.remove('hidden');
@@ -282,6 +284,9 @@
         if (!currentSong) return;
         players[idx].timeline.push({ titel: currentSong.titel, jahr: currentSong.jahr });
         players[idx].score = players[idx].timeline.length;
+
+        saveGameState();
+        
         if (players[idx].score >= 10) {
             players[idx].wins = (players[idx].wins || 0) + 1;
             confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
@@ -293,6 +298,9 @@
         if (players[idx].timeline.length > 0) {
             players[idx].timeline.pop();
             players[idx].score = players[idx].timeline.length;
+
+            saveGameState();
+        
         }
         renderScoreboard();
     }
@@ -390,6 +398,7 @@
     function resetScores() {
         if(confirm("Runde neustarten?")) {
             players.forEach(p => { p.score = 0; p.timeline = []; });
+            saveGameState();
             renderScoreboard();
         }
     }
@@ -405,6 +414,10 @@
             localStorage.clear();
             location.reload();
         }
+    }
+
+    function saveGameState() {
+        localStorage.setItem('hitster_players', JSON.stringify(players));
     }
 
     function toggleTutorial() {

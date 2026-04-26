@@ -4,12 +4,7 @@
   "description": "Errate das Jahr der größten Hits!",
   "icons": [
     {
-      "src": "icon.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "icon.png",
+      "src": "https://raw.githubusercontent.com/K4lkus/Test/main/icon.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"

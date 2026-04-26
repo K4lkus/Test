@@ -535,12 +535,16 @@
 
     function toggleTutorial() {
         const modal = document.getElementById('tutorial-modal');
-        if (modal.style.display === 'none' || modal.classList.contains('hidden')) {
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex';
-        } else {
-            modal.classList.add('hidden');
+    
+        // Wir nutzen einfach classList.toggle, das ist sauberer
+        modal.classList.toggle('hidden');
+    
+        // Da du oben im Style "display: flex" für das Modal definiert hast, 
+        // müssen wir sicherstellen, dass das 'hidden' (display: none) Priorität hat.
+        if (modal.classList.contains('hidden')) {
             modal.style.display = 'none';
+        } else {
+            modal.style.display = 'flex';
         }
     }
 

@@ -280,16 +280,21 @@
 
     async function startGame() {
         const url = document.getElementById('box-dropdown').value;
-        if(await loadSongsFromUrl(url)) {
+        const success = await loadSongsFromUrl(url);
+    
+        if (success) {
             const inputs = document.querySelectorAll('#name-inputs input');
-            players = Array.from(inputs).map(inp => ({ name: inp.value || "Spieler", score: 0, timeline: [], wins: 0 }));
+            // Nur Spieler erstellen, wenn noch keine da sind
+            if (!players || players.length === 0) {
+                players = Array.from(inputs).map(inp => ({ 
+                    name: inp.value || "Spieler", 
+                    score: 0, 
+                    timeline: [], 
+                    wins: 0 
+                }));
+            }
             localStorage.setItem('hitster_db_players', JSON.stringify(players));
             showGame();
-        }    
-        if (!players || players.length === 0) {
-            // Nur wenn noch keine Spieler da sind, neue erstellen
-            const inputs = document.querySelectorAll('#name-inputs input');
-            players = Array.from(inputs).map(inp => ({ name: inp.value || "Spieler", score: 0, timeline: [], wins: 0 }));
         }
     }
 

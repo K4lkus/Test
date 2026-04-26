@@ -532,6 +532,7 @@
 
     function undoLastSong() {
         if (lastSong) {
+            currentPlayerIndex = (currentPlayerIndex - 1 + players.length)  % players.lenght;
             currentSong = lastSong;
             lastSong = null; // Nur einmaliges Zurückgehen erlauben
             displaySong(currentSong);
@@ -541,6 +542,7 @@
             playedSongIds = playedSongIds.filter(id => id !== currentSong.ytId);
             localStorage.setItem('hitster_played_songs', JSON.stringify(playedSongIds));
             updateDbCounter();
+            renderScoreboard();
         
             alert("Letzter Song wurde wiederhergestellt!");
         }

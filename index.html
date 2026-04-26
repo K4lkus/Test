@@ -285,6 +285,7 @@
             players = Array.from(inputs).map(inp => ({ name: inp.value || "Spieler", score: 0, timeline: [], wins: 0 }));
             localStorage.setItem('hitster_db_players', JSON.stringify(players));
             showGame();
+        }    
         if (!players || players.length === 0) {
             // Nur wenn noch keine Spieler da sind, neue erstellen
             const inputs = document.querySelectorAll('#name-inputs input');
@@ -536,15 +537,13 @@
     function toggleTutorial() {
         const modal = document.getElementById('tutorial-modal');
     
-        // Wir nutzen einfach classList.toggle, das ist sauberer
-        modal.classList.toggle('hidden');
-    
-        // Da du oben im Style "display: flex" für das Modal definiert hast, 
-        // müssen wir sicherstellen, dass das 'hidden' (display: none) Priorität hat.
-        if (modal.classList.contains('hidden')) {
-            modal.style.display = 'none';
+        // Prüfen, ob das Fenster gerade unsichtbar ist
+        if (modal.style.display === 'none' || modal.style.display === '') {
+            modal.style.display = 'flex';     // Anzeigen
+            modal.classList.remove('hidden'); 
         } else {
-            modal.style.display = 'flex';
+            modal.style.display = 'none';     // Schließen
+            modal.classList.add('hidden');
         }
     }
 
